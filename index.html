@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skill Gap Analysis</title>
+<script src="https://unpkg.com/compromise"></script>
+<script>
+function analyzeSkills(jobText, cvText) {
+    var jobSkills = extractSkills(jobText);
+    var cvSkills = extractSkills(cvText);
+
+    var skillGap = findSkillGap(jobSkills, cvSkills);
+
+    document.getElementById('skillGap').innerHTML = skillGap.length === 0 ? "No skill gap found." : "Skill Gap: " + skillGap.join(" ");
+}
+
+function extractSkills(text) {
+    var doc = nlp(text);
+
+    // Extract phrases that might represent skills
+    var skills = doc.nouns().out('array').map(function(skill) {
+        return skill.replace(/,/g, ''); // Remove commas
+    });
+
+    // Convert to lowercase and remove duplicates
+    var uniqueSkills = Array.from(new Set(skills.map(skill => skill.toLowerCase())));
+
+    return uniqueSkills;
+}
+
+function findSkillGap(jobSkills, cvSkills) {
+    return jobSkills.filter(function(skill) {
+        return !cvSkills.includes(skill);
+    }).map(function(skill) {
+        return `<a href="https://www.google.com/search?q=define+${encodeURIComponent(skill)}" target="_blank">${skill}</a>`;
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById('analyzeBtn').addEventListener('click', function() {
+        var jobText = document.getElementById('jobCircular').value.trim();
+        var cvText = document.getElementById('applicantCV').value.trim();
+
+        if (jobText === '' || cvText === '') {
+            alert('Please enter both job circular and CV text.');
+            return;
+        }
+
+        analyzeSkills(jobText, cvText);
+    });
+});
+</script>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    margin: 25px 0;
+}
+
+textarea {
+    width: calc(100% - 22px); /* Adjust for border and padding */
+    height: 150px;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#skillGap {
+    margin-top: 10px;
+    font-weight: bold;
+}
+#skillGap a {
+	background: #5e5e5e;
+	color: white;
+	padding: .6vw 1.51vw;
+	line-height: 7vw;
+	text-transform: capitalize;
+	text-decoration: none;
+	white-space: nowrap;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Job Circular</h2>
+    <textarea id="jobCircular" placeholder="Enter job circular text"></textarea>
+    
+    <h2>Applicant's CV</h2>
+    <textarea id="applicantCV" placeholder="Enter applicant's CV text"></textarea>
+    
+    <button id="analyzeBtn">Analyze</button>
+    
+    <div id="analysisResult">
+        <h2>Analysis Result</h2>
+        <p id="skillGap"></p>
+    </div>
+</div>
+
+</body>
+</html>
